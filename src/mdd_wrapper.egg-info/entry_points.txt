@@ -1,2 +1,0 @@
-[console_scripts]
-mdd = mdd_wrapper.cli:main

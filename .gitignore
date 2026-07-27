@@ -7,3 +7,4 @@ build/
 .ruff_cache/
 uv.lock
 configs/confluence.yaml
+*.egg-info/

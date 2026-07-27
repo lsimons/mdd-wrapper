@@ -4,8 +4,8 @@ name: Live sync
 # space through the sync engine and push the Markdown mirror to a real
 # GitHub repository, using the GitHubBackend this wrapper provides.
 #
-# SAFETY (mdd spec S44): the two credentials this job holds must never be
-# able to reach an internal system.
+# SAFETY: the two credentials this job holds must never be able to reach
+# an internal system. This is a public repository.
 #
 #   CONFLUENCE_API_TOKEN — scoped to the `markdown.atlassian.net` sandbox
 #                          only. Not a corporate Atlassian token.

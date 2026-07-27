@@ -15,9 +15,12 @@ authors = [{ name = "lsimons" }]
 
 [project.scripts]
 # This wrapper is the only distribution installed as a tool, so it may
-# safely claim the `mdd` name. A wrapper that ships alongside another
-# claimant must not — see the "Owning bin/mdd" section of the mdd spec
-# S44 for why the name is decided by the installer, not by resolution.
+# safely claim the `mdd` name: an isolated tool install exposes scripts
+# from the named package only. A wrapper that has to coexist with another
+# claimant must not — `uv` resolves a same-name collision by alphabetical
+# distribution name, not by which package you installed, so the winner is
+# not the one you'd expect. Such a wrapper should have its installer own
+# `bin/mdd` explicitly. See the README.
 mdd = "mdd_wrapper.cli:main"
 
 [tool.uv.sources]
