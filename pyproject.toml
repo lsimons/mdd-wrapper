@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=82.0.1", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mdd-wrapper"
+version = "0.1.0"
+description = "Reference wrapper for mdd: a GitHub mirror backend behind the MirrorBackend seam"
+readme = "README.md"
+requires-python = ">=3.14"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+dependencies = ["mdd"]
+authors = [{ name = "lsimons" }]
+
+[project.scripts]
+# This wrapper is the only distribution installed as a tool, so it may
+# safely claim the `mdd` name. A wrapper that ships alongside another
+# claimant must not — see the "Owning bin/mdd" section of the mdd spec
+# S44 for why the name is decided by the installer, not by resolution.
+mdd = "mdd_wrapper.cli:main"
+
+[tool.uv.sources]
+# Pinned by tag for reproducibility. Local development points at a
+# sibling checkout instead:
+#   mdd = { path = "../mdd-open", editable = true }
+#
+# NOTE: `lsimons/mdd-open` is the private staging location for the
+# open-source core while it goes through internal review. It moves to
+# `schubergphilis/mdd` on publication; nothing else changes.
+mdd = { git = "https://github.com/lsimons/mdd-open", tag = "v0.1.0" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["mdd_wrapper*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B", "SIM", "C90", "PLC0415", "RUF", "PTH", "TC", "PT", "ARG", "S"]
+ignore = [
+    "S404",  # `import subprocess` — this wrapper orchestrates git by design
+    "S603",  # subprocess call — argv lists, never an untrusted shell string
+    "S607",  # partial executable path — `git` resolved via PATH
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]
+
+[tool.basedpyright]
+pythonVersion = "3.14"
+typeCheckingMode = "strict"
+include = ["src", "tests"]
+exclude = [".venv/**", "**/__pycache__/**"]
+
+[dependency-groups]
+dev = ["pytest>=9.1.1", "ruff>=0.15.21", "basedpyright>=1.39.9"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"

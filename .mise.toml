@@ -1,0 +1,27 @@
+[tools]
+python = "3.14"
+uv = "latest"
+
+[tasks.install]
+description = "uv sync (all groups)"
+run = "uv sync --all-groups"
+
+[tasks.lint]
+description = "ruff check + ruff format --check"
+run = ["uv run ruff check .", "uv run ruff format --check ."]
+
+[tasks.format]
+description = "ruff format + ruff check --fix"
+run = ["uv run ruff format .", "uv run ruff check --fix ."]
+
+[tasks.typecheck]
+description = "basedpyright strict"
+run = "uv run basedpyright"
+
+[tasks.test]
+description = "Unit tests"
+run = "uv run python -m pytest"
+
+[tasks.ci]
+description = "Full gate"
+depends = ["lint", "typecheck", "test"]
