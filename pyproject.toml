@@ -24,14 +24,8 @@ authors = [{ name = "lsimons" }]
 mdd = "mdd_wrapper.cli:main"
 
 [tool.uv.sources]
-# Pinned by tag for reproducibility. Local development points at a
-# sibling checkout instead:
-#   mdd = { path = "../mdd-open", editable = true }
-#
-# NOTE: `lsimons/mdd-open` is the private staging location for the
-# open-source core while it goes through internal review. It moves to
-# `schubergphilis/mdd` on publication; nothing else changes.
-mdd = { git = "https://github.com/lsimons/mdd-open", tag = "v0.1.0" }
+# Local development:
+mdd = { path = "../mdd", editable = true }
 
 [tool.setuptools.packages.find]
 where = ["src"]

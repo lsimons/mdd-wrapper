@@ -86,9 +86,7 @@ mise run install
 mise run ci        # lint + typecheck + tests
 ```
 
-`pyproject.toml` pins `mdd` by git tag. For local work against a sibling
-checkout, switch `[tool.uv.sources]` to
-`mdd = { path = "../mdd-open", editable = true }`.
+`pyproject.toml` expects mdd checked-out alongside this repo.
 
 ## Licence
 
