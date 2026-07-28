@@ -90,3 +90,30 @@ class TestGuardRemote:
 class TestReachable:
     def test_is_always_true(self) -> None:
         assert GitHubBackend("lsimons").reachable() is True
+
+
+class TestWebUrl:
+    """The browse URL the Confluence footer links to (GitHub's `/blob/` shape)."""
+
+    def test_blob_url_for_a_mirror_clone(self, tmp_path: Path) -> None:
+        repo = _repo_with_origin(tmp_path / "mirror", "https://github.com/lsimons/MDD.git")
+        page = repo / "Home" / "My Page.md"
+        page.parent.mkdir()
+        _ = page.write_text("# My Page\n", encoding="utf-8")
+
+        url = GitHubBackend("lsimons").web_url(page)
+
+        assert url == "https://github.com/lsimons/MDD/blob/main/Home/My%20Page.md"
+
+    def test_none_for_a_work_tree_on_another_host(self, tmp_path: Path) -> None:
+        repo = _repo_with_origin(tmp_path / "mirror", "git@gitlab.example.com:g/MDD.git")
+        page = repo / "Page.md"
+        _ = page.write_text("# Page\n", encoding="utf-8")
+
+        assert GitHubBackend("lsimons").web_url(page) is None
+
+    def test_none_outside_a_git_work_tree(self, tmp_path: Path) -> None:
+        page = tmp_path / "Page.md"
+        _ = page.write_text("# Page\n", encoding="utf-8")
+
+        assert GitHubBackend("lsimons").web_url(page) is None

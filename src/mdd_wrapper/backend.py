@@ -9,6 +9,8 @@ part, and it is expressed as four operations:
 - :meth:`ensure_remote` — create the remote project if it is missing;
 - :meth:`guard_remote` — refuse pushes that must not happen;
 - :meth:`reachable` — a cheap connectivity probe;
+- :meth:`web_url` — where a mirrored file can be read in a browser, which
+  the Confluence page footer links back to;
 
 plus :meth:`push`, which most backends leave as plain git.
 
@@ -24,6 +26,7 @@ from urllib.parse import urlsplit
 
 from mdd.mirror import EnsureOutcome, GenericGitBackend
 from mdd.mirror.errors import MirrorPushError
+from mdd.mirror.web import GITHUB_BLOB_INFIX, git_blob_url
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -92,6 +95,17 @@ class GitHubBackend(GenericGitBackend):
         # github.com needs no VPN; let the push report a real network
         # failure rather than pre-empting it with a guess.
         return True
+
+    def web_url(self, path: Path) -> str | None:
+        """Return the GitHub blob URL for a mirrored file, or ``None``.
+
+        The generic core deliberately declines to guess a browse URL — the
+        blob-path shape differs per forge — so a backend that knows its forge
+        supplies the convention. GitHub's is ``/blob/<branch>/<path>``, and
+        ``github.com`` is the allow-list: a work-tree pointing anywhere else
+        is not one of our mirrors.
+        """
+        return git_blob_url(path, allowed_host=GITHUB_HOST, blob_infix=GITHUB_BLOB_INFIX)
 
 
 def _split_owner(url: str) -> tuple[str, str]:
