@@ -1,0 +1,25 @@
+version: 2
+updates:
+  # `pip`, not `uv`, even though the uv ecosystem is the one that keeps
+  # uv.lock in step with a bump. It cannot run here: `mdd` is a path source
+  # (`../mdd`, which CI clones) and Dependabot only checks out this
+  # repository, so the uv updater fails the whole job with
+  # `path_dependencies_not_reachable`. Measured 2026-07-30 against the same
+  # topology in the private SBP wrapper; the core itself switched to `uv`
+  # successfully because it has no path dependency.
+  #
+  # Consequence: a merged bump PR rewrites the pyproject constraint and
+  # leaves uv.lock behind. Follow it with `uv lock` so the committed closure
+  # matches.
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7

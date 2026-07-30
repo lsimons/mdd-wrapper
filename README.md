@@ -86,7 +86,10 @@ mise run install
 mise run ci        # lint + typecheck + tests
 ```
 
-`pyproject.toml` expects mdd checked-out alongside this repo.
+`pyproject.toml` expects mdd checked out alongside this repo, at `../mdd`
+— CI clones it there too. The committed `uv.lock` pins the third-party
+closure against that checkout; refresh it with `uv lock` after changing a
+dependency.
 
 ## Contributing
 
