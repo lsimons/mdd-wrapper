@@ -5,6 +5,5 @@ dist/
 build/
 .pytest_cache/
 .ruff_cache/
-uv.lock
 configs/confluence.yaml
 *.egg-info/
