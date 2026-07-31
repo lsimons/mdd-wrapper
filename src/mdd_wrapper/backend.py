@@ -2,7 +2,7 @@
 
 `mdd`'s sync engines end a run by committing the mirror work-tree and
 (optionally) pushing it somewhere. *Where* is the only provider-specific
-part, and it is expressed as four operations:
+part, and it is expressed as five operations:
 
 - :meth:`resolve_remote` — the clone URL for a target, used to bootstrap a
   mirror that is not a git repository yet;
@@ -22,11 +22,10 @@ owner. It is deliberately small: the interesting content is what it
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from urllib.parse import urlsplit
 
 from mdd.mirror import EnsureOutcome, GenericGitBackend
 from mdd.mirror.errors import MirrorPushError
-from mdd.mirror.web import GITHUB_BLOB_INFIX, git_blob_url
+from mdd.mirror.web import GITHUB_BLOB_INFIX, git_blob_url, split_clone_url
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -84,8 +83,17 @@ class GitHubBackend(GenericGitBackend):
         except GitError as exc:
             raise MirrorPushError(f"{path}: no 'origin' remote to guard: {exc}") from exc
 
-        host, owner = _split_owner(origin)
-        if host != GITHUB_HOST or owner != self.owner.lower():
+        # Clone-URL parsing is core plumbing, not backend knowledge: it has to
+        # cope with both `git@host:owner/repo.git` and `https://host/owner/repo`,
+        # and getting the host wrong here is what lets a lookalike remote
+        # through. `split_clone_url` returns None for anything it does not
+        # recognise, which this treats as "not ours".
+        parts = split_clone_url(origin)
+        if (
+            parts is None
+            or parts.host != GITHUB_HOST
+            or parts.namespace.lower() != self.owner.lower()
+        ):
             raise MirrorPushError(
                 f"refusing to push {path}: origin is {origin!r}, "
                 f"but this backend only writes to {GITHUB_HOST}/{self.owner}/"
@@ -106,21 +114,3 @@ class GitHubBackend(GenericGitBackend):
         is not one of our mirrors.
         """
         return git_blob_url(path, allowed_host=GITHUB_HOST, blob_infix=GITHUB_BLOB_INFIX)
-
-
-def _split_owner(url: str) -> tuple[str, str]:
-    """Return ``(lowercased host, lowercased first path segment)`` from a clone URL.
-
-    Handles both ``git@github.com:owner/repo.git`` and
-    ``https://github.com/owner/repo.git``. Returns empty strings for
-    anything unrecognised, which the caller treats as "not ours".
-    """
-    if url.startswith("git@"):
-        host, _, path = url[len("git@") :].partition(":")
-    elif url.startswith(("https://", "http://")):
-        parts = urlsplit(url)
-        host, path = parts.hostname or "", parts.path
-    else:
-        return "", ""
-    segments = [s for s in path.strip("/").split("/") if s]
-    return host.lower(), segments[0].lower() if segments else ""
