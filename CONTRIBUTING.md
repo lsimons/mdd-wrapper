@@ -1,9 +1,23 @@
 # Contributing
 
-Thanks for taking the time to look at `mdd`.
+Thanks for taking the time to look at `mdd-wrapper`.
 
 Contributions are governed by the [Apache-2.0 licence](LICENSE), and
 participation by the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+## What belongs here
+
+This repository is a *reference*, not a product: the smallest complete
+example of building on [`mdd`](https://github.com/schubergphilis/mdd)
+without forking it. Two rules follow from that.
+
+- **Keep it small.** A change that makes the wrapper bigger without
+  demonstrating more of the seam does not belong. If a feature would be
+  useful to everyone, it belongs in the core.
+- **Track the core.** When the core changes `MirrorBackend`, the skill
+  roots, or `build_dispatcher`'s arguments, this repo is expected to
+  change with it. Drifting quietly is the one failure mode that makes a
+  reference worse than none.
 
 ## Getting set up
 
@@ -13,34 +27,26 @@ mise run install      # uv sync --all-groups
 mise run ci           # the full gate
 ```
 
-Three external tools are exercised by the unit suite and must be on
-`PATH`: `quarto`, `rsvg-convert` (librsvg) and `rg` (ripgrep).
+`pyproject.toml` resolves `mdd` from a sibling checkout at `../mdd`, so
+clone it there first. Only `git` is needed beyond that; the core's own
+external tools are exercised by the core's suite, not this one.
 
 ## The gate
 
-`mise run ci` is the contract. It runs, in order: conflict-marker check,
-`ruff check` + `ruff format --check`, `basedpyright` in strict mode, the
-`complexipy` cognitive-complexity gate, `pip-audit` over the dependency
-closure, the unit suite, and the IR round-trip and coverage suites.
-
-A pull request is expected to be green before review. In particular:
+`mise run ci` is the contract: `ruff check` + `ruff format --check`,
+`basedpyright` in strict mode, then the unit suite. It is expected to be
+green before review.
 
 - **Full type annotations.** `basedpyright` runs in strict mode and must
   report zero errors. Suppress with a specific code
   (`# pyright: ignore[reportAny]`), never a bare ignore.
-- **Structural limits.** Cyclomatic complexity ≤ 10, ≤ 40 statements,
-  ≤ 10 branches, ≤ 6 arguments, ≤ 6 returns per function. New code that
-  trips these gets refactored, not `# noqa`'d — and a blanket `# noqa`
-  with no code is rejected outright.
-- **Tests for behaviour changes.** Anything talking to a live service is
-  marked `@pytest.mark.integration` and stays out of the default run.
-
-## Design docs
-
-Non-trivial features start with a spec in `docs/spec/` (`SNN-<slug>.md`).
-`mise run new-spec <slug>` scaffolds one and `mise run spec-check`
-validates the result. Specs are self-contained by rule: they describe the
-design without depending on any working document to be readable.
+- **Tests for behaviour changes.** `tests/test_backend.py` pins the
+  backend against the `MirrorBackend` protocol, so a method added to the
+  core surfaces here as a typecheck failure rather than a runtime one.
+  Keep that assertion working.
+- **No live services in the unit suite.** The one job that talks to real
+  Confluence and GitHub is `.github/workflows/live-sync.yml`, on a
+  schedule, against sandbox accounts.
 
 ## Commits
 
@@ -51,7 +57,8 @@ design without depending on any working document to be readable.
 
 ## A note on how this is built
 
-`mdd` is written largely by AI agents under human review. That does not
-change what is expected of a contribution — the gate is the gate — but it
-does mean the codebase carries unusually detailed inline rationale.
-Please keep that up: explain *why*, not *what*.
+`mdd` and this wrapper are written largely by AI agents under human
+review. That does not change what is expected of a contribution — the
+gate is the gate — but it does mean the code carries unusually detailed
+inline rationale. Please keep that up: explain *why*, not *what*.
+[`AGENTS.md`](AGENTS.md) is the instruction file agents read.
