@@ -834,17 +834,13 @@ requires-dist = [
 dev = [
     { name = "basedpyright", specifier = ">=1.39.9" },
     { name = "complexipy", specifier = ">=6.2.0" },
-    { name = "cyclonedx-bom", specifier = ">=7.3.0" },
     { name = "lxml-stubs", specifier = ">=0.5.1" },
     { name = "pip-audit", specifier = ">=2.10.1" },
     { name = "pytest", specifier = ">=9.1.1" },
     { name = "pytest-cov", specifier = ">=7.1.0" },
-    { name = "radon", specifier = ">=6.0.1" },
-    { name = "refurb", specifier = ">=2.3.1" },
     { name = "reportlab", specifier = ">=5.0.0" },
     { name = "ruff", specifier = ">=0.15.22" },
     { name = "setuptools-scm", specifier = ">=10.2.1" },
-    { name = "vulture", specifier = ">=2.16" },
 ]
 
 [[package]]
