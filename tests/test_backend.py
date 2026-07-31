@@ -6,13 +6,28 @@ import subprocess
 from typing import TYPE_CHECKING
 
 import pytest
-from mdd.mirror import MirrorTarget
+from mdd.mirror import MirrorBackend, MirrorTarget
 from mdd.mirror.errors import MirrorPushError
 
 from mdd_wrapper.backend import GitHubBackend
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+
+def test_satisfies_the_mirror_backend_protocol() -> None:
+    """`GitHubBackend` must structurally satisfy `MirrorBackend`.
+
+    This is the drift alarm. `MirrorBackend` is a `Protocol`, so nothing
+    forces a backend to declare conformance and a method added upstream
+    goes unnoticed until it is called at runtime. Annotating the
+    assignment makes basedpyright check the whole surface, so the next
+    method the core adds fails `mise run typecheck` here — unless
+    `GenericGitBackend` supplies it, which is the case where inheriting
+    the default is the right answer anyway.
+    """
+    backend: MirrorBackend = GitHubBackend("lsimons")
+    assert backend is not None
 
 
 def _repo_with_origin(path: Path, origin: str) -> Path:
@@ -76,6 +91,12 @@ class TestGuardRemote:
         repo = _repo_with_origin(
             tmp_path / "m", "https://github.com.attacker.example/lsimons/mirror.git"
         )
+        with pytest.raises(MirrorPushError, match="only writes to"):
+            GitHubBackend("lsimons").guard_remote(repo)
+
+    def test_refuses_an_origin_the_parser_does_not_recognise(self, tmp_path: Path) -> None:
+        """A remote that is neither scp-like nor http(s) cannot be shown to be ours."""
+        repo = _repo_with_origin(tmp_path / "m", "/srv/git/mirror.git")
         with pytest.raises(MirrorPushError, match="only writes to"):
             GitHubBackend("lsimons").guard_remote(repo)
 
