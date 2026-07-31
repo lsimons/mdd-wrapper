@@ -31,6 +31,13 @@ mdd = { path = "../mdd", editable = true }
 where = ["src"]
 include = ["mdd_wrapper*"]
 
+[tool.setuptools.package-data]
+# The skills bundle is data, not a package — no `__init__.py` — so
+# `packages.find` will not pick it up. Without this the wheel builds
+# fine and `mdd skills list` finds nothing at runtime, which is the
+# failure a wrapper is most likely to ship by accident.
+mdd_wrapper = ["skills/*/SKILL.md"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py314"
