@@ -1,6 +1,14 @@
+# Tool versions are pinned exactly, not floated: a wrapper whose job is to
+# stay in lockstep with the core has to fail on a toolchain change rather
+# than absorb it silently. Bump these deliberately.
 [tools]
-python = "3.14"
-uv = "latest"
+python = "3.14.6"
+uv = "0.12.1"
+zizmor = "1.29.0"
+actionlint = "1.7.12"
+# actionlint shells out to shellcheck for every `run:` block when it is on
+# PATH, so pin it here rather than leaving that to whatever the machine has.
+shellcheck = "0.11.0"
 
 [tasks.install]
 description = "uv sync (all groups)"
@@ -19,9 +27,38 @@ description = "basedpyright strict"
 run = "uv run basedpyright"
 
 [tasks.test]
-description = "Unit tests"
+description = "pytest with coverage (floor in pyproject.toml)"
 run = "uv run python -m pytest"
+
+[tasks.audit]
+description = "zizmor + actionlint over the workflows and dependabot config"
+# zizmor's online audits (impostor-commit, known-vulnerable-actions) need a
+# token; without one it warns and falls back to offline, which is an
+# unverified result rather than a pass.
+run = [
+  "GH_TOKEN=$(gh auth token 2>/dev/null) zizmor --collect=all --strict-collection .",
+  "actionlint",
+]
 
 [tasks.ci]
 description = "Full gate"
-depends = ["lint", "typecheck", "test"]
+depends = ["lint", "typecheck", "test", "audit"]
+
+[tasks.ci-watch]
+description = "Watch GitHub Actions CI for the current branch; exits non-zero on failure"
+# `origin` here is not necessarily the GitHub remote, so prefer the remote
+# whose URL actually names github.com.
+run = """
+sleep 5
+repo=""
+for remote in $(git remote); do
+  url=$(git remote get-url "$remote")
+  case "$url" in
+    *github.com*) repo=$(echo "$url" | sed -E 's|^.*github\\.com[:/]||; s|\\.git$||'); break ;;
+  esac
+done
+if [ -z "$repo" ]; then echo "No github.com remote configured" >&2; exit 1; fi
+run_id=$(gh run list --repo "$repo" --branch "$(git branch --show-current)" --limit 1 --json databaseId --jq '.[0].databaseId')
+if [ -z "$run_id" ]; then echo "No run found for current branch on $repo" >&2; exit 1; fi
+gh run watch --repo "$repo" --exit-status "$run_id"
+"""

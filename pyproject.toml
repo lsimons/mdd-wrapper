@@ -60,8 +60,15 @@ include = ["src", "tests"]
 exclude = [".venv/**", "**/__pycache__/**"]
 
 [dependency-groups]
-dev = ["pytest>=9.1.1", "ruff>=0.15.21", "basedpyright>=1.39.9"]
+dev = ["pytest>=9.1.1", "pytest-cov>=7.1.0", "ruff>=0.15.21", "basedpyright>=1.39.9"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-v"
+# The coverage floor is in addopts, not merely in [tool.coverage], so
+# `mise run test` enforces it rather than only reporting it. Four source
+# files measure at 98%; the floor sits below that on purpose, to catch a
+# new uncovered branch without failing on a single defensive line.
+addopts = "-v --cov=mdd_wrapper --cov-report=term-missing --cov-fail-under=90"
+
+[tool.coverage.run]
+source = ["src/mdd_wrapper"]

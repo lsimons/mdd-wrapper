@@ -28,14 +28,24 @@ mise run ci           # the full gate
 ```
 
 `pyproject.toml` resolves `mdd` from a sibling checkout at `../mdd`, so
-clone it there first. Only `git` is needed beyond that; the core's own
-external tools are exercised by the core's suite, not this one.
+clone it there first. `mise install` supplies everything else the gate
+needs, including `zizmor` and `actionlint`; the core's own external tools
+are exercised by the core's suite, not this one.
+
+Issues live on GitHub — see
+[`docs/agents/issue-tracker.md`](docs/agents/issue-tracker.md) for the
+labels and how they are used.
 
 ## The gate
 
 `mise run ci` is the contract: `ruff check` + `ruff format --check`,
-`basedpyright` in strict mode, then the unit suite. It is expected to be
-green before review.
+`basedpyright` in strict mode, the unit suite, then `zizmor` +
+`actionlint` over the workflows. It is expected to be green before
+review.
+
+- **Coverage floor.** `mise run test` fails below 90% line coverage. The
+  floor is a regression guard, not a target — do not reach it by testing
+  trivia.
 
 - **Full type annotations.** `basedpyright` runs in strict mode and must
   report zero errors. Suppress with a specific code

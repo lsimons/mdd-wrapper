@@ -1,5 +1,8 @@
 # AI agent instructions for mdd-wrapper
 
+This file (`AGENTS.md`) is the canonical agent configuration. `CLAUDE.md`
+is a symlink to this file.
+
 [README.md](README.md) explains what this is.
 [CONTRIBUTING.md](CONTRIBUTING.md) explains how to contribute.
 
@@ -41,8 +44,43 @@ typecheck` here. Trust that alarm; do not silence it.
 ## The gate
 
 `mise run ci` — `ruff check` + `ruff format --check`, `basedpyright`
-strict, then the unit suite. Green before review, no exceptions. Use
+strict, the unit suite with a 90% coverage floor, then `zizmor` +
+`actionlint` over the workflows. Green before review, no exceptions. Use
 `uv run mdd`, because an installed `mdd` may be a different wrapper.
+
+Tasks (`mise tasks`):
+
+| Task | What it does |
+| --- | --- |
+| `install` | `uv sync --all-groups` |
+| `lint` | `ruff check` + `ruff format --check` |
+| `format` | `ruff format` + `ruff check --fix` |
+| `typecheck` | `basedpyright` strict |
+| `test` | `pytest` with coverage; floor in `pyproject.toml` |
+| `audit` | `zizmor` + `actionlint` over the workflows and dependabot config |
+| `ci` | the full gate: all of the above |
+| `ci-watch` | watch the GitHub Actions run for the current branch |
+
+Local `ci` passing does not mean CI passes; after pushing, use
+`mise run ci-watch`.
+
+## Agent skills
+
+### Git remote
+
+Use GitHub with `gh`, against `lsimons/mdd-wrapper`. A clone may have
+several remotes and `origin` is not necessarily the GitHub one, so pass
+`--repo lsimons/mdd-wrapper` explicitly instead of relying on the default.
+
+### Issue tracker
+
+Use GitHub issues on `lsimons/mdd-wrapper`. See
+[`docs/agents/issue-tracker.md`](docs/agents/issue-tracker.md).
+
+### Triage labels
+
+Use needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix.
+See [`docs/agents/issue-tracker.md`](docs/agents/issue-tracker.md).
 
 ## No cross-references from code
 
