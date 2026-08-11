@@ -5,6 +5,9 @@ dist/
 build/
 .pytest_cache/
 .ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
 configs/confluence.yaml
 *.egg-info/
 tmp/

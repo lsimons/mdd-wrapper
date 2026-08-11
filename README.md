@@ -127,8 +127,12 @@ broken skill root.
 
 ```bash
 mise run install
-mise run ci        # lint + typecheck + tests
+mise run ci        # lint + typecheck + tests (90% coverage floor) + workflow audit
+mise run ci-watch  # after pushing: watch the GitHub Actions run
 ```
+
+`mise tasks` lists the rest. Tool versions are pinned exactly in
+`.mise.toml`.
 
 `pyproject.toml` expects mdd checked out alongside this repo, at `../mdd`
 — CI clones it there too. The committed `uv.lock` pins the third-party

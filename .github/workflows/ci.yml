@@ -43,3 +43,10 @@ jobs:
 
       - name: Test
         run: mise run test
+
+      - name: Audit workflows
+        env:
+          # zizmor's impostor-commit and known-vulnerable-actions audits are
+          # online; without a token they are skipped rather than passed.
+          GH_TOKEN: ${{ github.token }}
+        run: mise run audit
