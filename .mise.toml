@@ -1,10 +1,14 @@
+[settings]
+minimum_release_age = "7d"
+lockfile = true
+
 # Tool versions are pinned exactly, not floated: a wrapper whose job is to
 # stay in lockstep with the core has to fail on a toolchain change rather
 # than absorb it silently. Bump these deliberately.
 [tools]
-python = "3.14.6"
-uv = "0.12.1"
-zizmor = "1.29.0"
+python = "3.15.2"
+uv = "0.13.6"
+zizmor = "1.31.1"
 actionlint = "1.7.12"
 # actionlint shells out to shellcheck for every `run:` block when it is on
 # PATH, so pin it here rather than leaving that to whatever the machine has.
