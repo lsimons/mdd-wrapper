@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=82.0.1", "wheel"]
+requires = ["setuptools>=84.2.1", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -60,7 +60,7 @@ include = ["src", "tests"]
 exclude = [".venv/**", "**/__pycache__/**"]
 
 [dependency-groups]
-dev = ["pytest>=9.1.1", "pytest-cov>=7.1.0", "ruff>=0.15.21", "basedpyright>=1.39.9"]
+dev = ["pytest>=9.2.0", "pytest-cov>=7.1.0", "ruff>=0.17.3", "basedpyright>=1.40.2"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
