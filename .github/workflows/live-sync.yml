@@ -61,6 +61,12 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Checkout mdd
+        if: steps.creds.outputs.ready == 'true'
+        # Same as ci.yml: pyproject.toml's [tool.uv.sources] points `mdd` at
+        # a sibling checkout, and `mise run install` fails without it.
+        run: git clone --depth 1 https://github.com/schubergphilis/mdd.git ../mdd
+
       - name: Set up mise
         if: steps.creds.outputs.ready == 'true'
         uses: jdx/mise-action@6612f0ef07ed2a736cd1e00a94a065522dd41195 # v5.2.5
